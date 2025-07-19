@@ -1,0 +1,23 @@
+<?php
+return [
+    'title' => 'Checkout - Shipping & Payment',
+    'description' => 'Enter your shipping address and confirm your order.',
+    'shipping_address' => 'Shipping Address',
+    'full_name' => 'Full Name',
+    'address_line1' => 'Address Line 1',
+    'address_line2' => 'Address Line 2 (Optional)',
+    'city' => 'City',
+    'select_city' => 'Select a city',
+    'delivery_fees' => 'delivery fees',
+    'state' => 'State',
+    'postal_code' => 'Postal Code',
+    'country' => 'Country',
+    'phone_number' => 'Phone Number',
+    'promo_code' => 'Promo Code (Optional)',
+    'enter_promo' => 'Enter promo code',
+    'summary' => 'Summary',
+    'your_order' => 'Your Order',
+    'subtotal' => 'Subtotal',
+    'total' => 'Total',
+    'confirm' => 'Confirm',
+];

@@ -1,0 +1,23 @@
+<?php 
+return [
+    'title' => 'إتمام الشراء - العنوان والدفع',
+    'description' => 'أدخل عنوان الشحن الخاص بك وأكد طلبك.',
+    'shipping_address' => 'عنوان الشحن',
+    'full_name' => 'الاسم الكامل',
+    'address_line1' => 'العنوان 1',
+    'address_line2' => 'العنوان 2 (اختياري)',
+    'city' => 'المدينة',
+    'select_city' => 'اختر مدينة',
+    'delivery_fees' => 'رسوم التوصيل',
+    'state' => 'المحافظة',
+    'postal_code' => 'الرمز البريدي',
+    'country' => 'البلد',
+    'phone_number' => 'رقم الهاتف',
+    'promo_code' => 'كود الخصم (اختياري)',
+    'enter_promo' => 'أدخل كود الخصم',
+    'summary' => 'ملخص الطلب',
+    'your_order' => 'طلبك',
+    'subtotal' => 'المجموع الفرعي',
+    'total' => 'الإجمالي',
+    'confirm' => 'تأكيد',
+];
