@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
-use App\Models\DiscountCodes; // Make sure you have the correct namespace for your DiscountCodes model
+use App\Models\discountCodes; // Make sure you have the correct namespace for your discountCodes model
 use App\Models\orders;
 
 class ValidPromoCode implements Rule
@@ -16,7 +16,7 @@ class ValidPromoCode implements Rule
         $userId = Auth::id();
 
         // Step 2: Check if the promo code exists and is not expired
-        $promoCode = DiscountCodes::where('code', $value)
+        $promoCode = discountCodes::where('code', $value)
                                  ->where('expiry_date', '>', now()) // Check if it's not expired
                                  ->first();
 

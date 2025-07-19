@@ -699,3 +699,11 @@ a {
     border-bottom: 1px solid var(--color-black);
     border-left: none;
 }
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.4); /* Make it visible on light backgrounds */
+    background-size: 100%, 100%;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+}

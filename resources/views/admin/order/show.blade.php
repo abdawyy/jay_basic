@@ -1,233 +1,176 @@
 <x-admin.header />
 <x-admin.aside />
-
 <x-admin.navbar />
+
 <main id="main">
     <div class="container-fluid">
         <div class="row pt-4">
-            <div class="col-12">
-                {{-- <div class="pagetitle d-flex justify-content-between align-items-center">
-                    <h1>Orders</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="">Orders</a></li>
-                            <li class="breadcrumb-item active">Show</li>
-                        </ol>
-                    </nav>
-                </div><!-- End Breadcrumbs with a page title -->
+            @php $isRtl = app()->getLocale() === 'ar'; @endphp
+            <div class="pagetitle">
+                <h1>{{ __('orders.title') }}</h1>
+                <nav>
+                    <ol class="breadcrumb d-flex {{ $isRtl ? 'text-end' : 'text-start' }}"
+                        dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+                        <li class="breadcrumb-item"><a href="#">{{ __('orders.breadcrumb_main') }}</a></li>
+                        <li class="mx-2">-</li>
+                        <li class="breadcrumb-item active">{{ __('orders.breadcrumb_show') }}</li>
+                    </ol>
+                </nav>
             </div>
         </div>
-        <!-- Add another row for the button -->
-        <div class="row">
-            <div class="col-12 text-end">
-                <button class="btn btn-secondary" onclick="printReceipt()">Print Receipt</button>
+
+        <div class="container" id="receipt">
+            <div class="row">
+                <div class="col-12 text-end">
+                    <button id="printButton" class="btn btn-secondary" onclick="printReceipt()">
+                        {{ __('orders.print_receipt') }}
+                    </button>
+                </div>
             </div>
+
+            <h1>{{ __('orders.order_details') }}</h1>
+            <div class="card mb-3">
+                <div class="card-header">
+                    {{ __('orders.order_number') }} #{{ $order->id }}
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ __('orders.user') }}:</strong> {{ $order->user->name ?? 'N/A' }}</p>
+                    <p><strong>{{ __('orders.city') }}:</strong> {{ $order->cities->name ?? 'N/A' }}</p>
+                    <p><strong>{{ __('orders.delivery_fees') }}:</strong> {{ $order->cities->price ?? 'N/A' }} LE</p>
+                    <p><strong>{{ __('orders.total_amount') }}:</strong> {{ $order->total_amount }} LE</p>
+                    <p><strong>{{ __('orders.discount_code') }}:</strong> {{ $order->discountCodes->code ?? 'N/A' }}</p>
+                    <p><strong>{{ __('orders.date') }}:</strong> {{ $order->created_at->format('Y-m-d H:i') }}</p>
+                    <p><strong>{{ __('orders.status') }}:</strong> {{ $order->status ?? 'Pending' }}</p>
+                </div>
+            </div>
+
+            <h2>{{ __('orders.address') }}</h2>
+            <div class="card mb-3">
+                <div class="card-body">
+                    @if ($order->user && $order->user->address->isNotEmpty())
+                        @foreach ($order->user->address as $address)
+                            <div class="mb-3">
+                                <p><strong>{{ __('orders.address_line1') }}:</strong> {{ $address->address_line1 }}</p>
+                                <p><strong>{{ __('orders.address_line2') }}:</strong> {{ $address->address_line2 }}</p>
+                                <p><strong>{{ __('orders.city') }}:</strong> {{ $address->city }}</p>
+                                <p><strong>{{ __('orders.state') }}:</strong> {{ $address->state }}</p>
+                                <p><strong>{{ __('orders.phone') }}:</strong> {{ $address->phone_number }}</p>
+                                <p><strong>{{ __('orders.postal_code') }}:</strong> {{ $address->postal_code }}</p>
+                                <p><strong>{{ __('orders.country') }}:</strong> {{ $address->country }}</p>
+                                <hr>
+                            </div>
+                        @endforeach
+                    @else
+                        <p><strong>{{ __('orders.address') }}:</strong> N/A</p>
+                    @endif
+                </div>
+            </div>
+
+            <h2>{{ __('orders.order_items') }}</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ __('orders.product') }}</th>
+                        <th>{{ __('orders.size') }}</th>
+                        <th>{{ __('orders.quantity') }}</th>
+                        <th>{{ __('orders.price') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($order->orderItems as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->product->name ?? 'N/A' }}</td>
+                            <td>{{ $item->size ?? 'N/A' }}</td>
+                            <td>{{ $item->quantity ?? 0 }}</td>
+                            <td>
+                                @if ($item->product->sale)
+                                    <span class="text-decoration-line-through">
+                                        {{ $item->product->price }} LE
+                                    </span>
+                                    {{ $item->product->price - ($item->product->price * $item->product->sale / 100) }} LE
+                                @else
+                                    {{ $item->price / $item->quantity ?? 0 }} LE
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">{{ __('orders.no_items') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            <h2>{{ __('orders.payments') }}</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ __('orders.amount') }}</th>
+                        <th>{{ __('orders.date') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($order->payments as $payment)
+                        <tr>
+                            <td>{{ $payment->id }}</td>
+                            <td>{{ $payment->amount }} LE</td>
+                            <td>{{ $payment->created_at->format('Y-m-d H:i') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3">{{ __('orders.no_payments') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            {{-- Status Update --}}
+            <form action="{{ route('order.changeStatus', $order->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="form-group">
+                    <label for="status">{{ __('orders.change_status') }}</label>
+                    <select name="status" class="form-control">
+                        <option value="Pending" {{ $order->status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Processing" {{ $order->status == 'Processing' ? 'selected' : '' }}>Processing</option>
+                        <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">{{ __('orders.update') }}</button>
+            </form>
         </div>
-    </div> --}}
+    </div>
+</main>
 
+{{-- Print Styles --}}
+<style>
+    @media print {
+        #navbar, #sidebar, #printButton, form, .btn {
+            display: none;
+        }
 
-    <x-admin.header />
+        #receipt, #receipt * {
+            visibility: visible;
+        }
 
+        #receipt {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 100%;
+        }
+    }
+</style>
 
-                <div class="container">
-                    <div class="row">
-                        <div class="col-12 text-end">
-                            <button id="printButton" class="btn btn-secondary" onclick="printReceipt()">Print
-                                Receipt</button>
-                        </div>
-                    </div>
-                    <h1>Order Details</h1>
+{{-- Print Logic --}}
+<script>
+    function printReceipt() {
+        window.print();
+    }
+</script>
 
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            Order #{{ $order->id }}
-                        </div>
-                        <div class="card-body">
-                            <p><strong>User:</strong> {{ $order->user->name ?? 'N/A' }}</p>
-                            <p><strong>City:</strong> {{ $order->cities->name ?? 'N/A' }}</p>
-                            <p><strong>Delivery Fees:</strong> {{ $order->cities->price ?? 'N/A' }}</p>
-                            <p><strong>Total Amount:</strong> {{ $order->total_amount ?? 'N/A' }} LE</p>
-
-
-                            <p><strong>Discount Code:</strong> {{ $order->discountCodes->code ?? 'N/A' }}</p>
-                            <p><strong>Order Date:</strong>
-                                {{ $order->created_at ? $order->created_at->format('Y-m-d H:i') : 'N/A' }}</p>
-                            <p><strong>Status:</strong> {{ $order->status ?? 'Pending' }}</p>
-                        </div>
-                    </div>
-                    <h1>Address</h1>
-
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            @if ($order->user && $order->user->address->isNotEmpty())
-                                @foreach ($order->user->address as $address)
-                                    <div class="address-section mb-3">
-                                        <p><strong>Address Line 1:</strong> {{ $address->address_line1 ?? 'N/A' }}</p>
-                                        <p><strong>Address Line 2:</strong> {{ $address->address_line2 ?? 'N/A' }}</p>
-                                        <p><strong>City:</strong> {{ $address->city ?? 'N/A' }}</p>
-                                        <p><strong>State:</strong> {{ $address->state ?? 'N/A' }}</p>
-                                                                <p><strong>Mobile:</strong> {{ $address->phone_number ?? 'N/A' }}</p>
-
-                                        <p><strong>Postal Code:</strong> {{ $address->postal_code ?? 'N/A' }}</p>
-                                        <p><strong>Country:</strong> {{ $address->country ?? 'N/A' }}</p>
-                                        <hr>
-                                    </div>
-                                @endforeach
-                            @else
-                                <p><strong>Address:</strong> N/A</p>
-                            @endif
-                        </div>
-                    </div>
-
-                    <h2>Order Items</h2>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Product</th>
-                                <th>Size</th>
-
-                                <th>Quantity</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-         @forelse($order->orderItems as $item)
-    <tr>
-        <td>{{ $item->id }}</td>
-        <td>{{ $item->product->name ?? 'N/A' }}</td>
-        <td>{{ $item->size ?? 'N/A' }}</td>
-        <td>{{ $item->quantity ?? 0 }}</td>
-        <td>
-            @if ($item->product->sale)
-                <span class="mx-3 text-decoration-line-through fw-normal fst-italic fc-gray">
-                    {{ $item->product->price }} LE
-                </span>
-                {{ $item->product->price - ($item->product->price * $item->product->sale / 100) }} LE
-            @else
-                {{ $item->price / $item->quantity ?? 0 }} LE
-            @endif
-        </td>
-    </tr>
-@empty
-    <tr>
-        <td colspan="5">No items found</td>
-    </tr>
-@endforelse
-
-                        </tbody>
-                    </table>
-
-                    <h2>Payments</h2>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            @forelse($order->payments as $payment)
-                                <tr>
-                                    <td>{{ $payment->id }}</td>
-                                    <td>{{ $payment->amount ?? 0 }} LE</td>
-                                    <td>{{ $payment->created_at ? $payment->created_at->format('Y-m-d H:i') : 'N/A' }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3">No payments found for this order.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-
-                    <form id="form" action="{{ route('order.changeStatus', $order->id) }}" method="POST"
-                        class="mt-4">
-                        @csrf
-                        @method('PUT')
-                        <div class="form-group">
-                            <label for="status">Change Status:</label>
-                            <select name="status" id="status" class="form-control">
-                                <option value="Pending" {{ $order->status == 'Pending' ? 'selected' : '' }}>Pending
-                                </option>
-                                <option value="Processing" {{ $order->status == 'Processing' ? 'selected' : '' }}>
-                                    Processing</option>
-                                <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>
-                                    Completed
-                                </option>
-                                <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>
-                                    Cancelled
-                                </option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
-                    </form>
-
-                </div>
-
-                <!-- Receipt Section -->
-                <div id="receipt" style="display: none;">
-                    <h2>Receipt</h2>
-                    <p><strong>Order ID:</strong> <span id="receiptOrderId"></span></p>
-                    <p><strong>User Name:</strong> <span id="receiptUserName"></span></p>
-                    <p><strong>City:</strong> <span id="receiptCity"></span></p>
-                    <p><strong>Order Date:</strong> <span id="receiptOrderDate"></span></p>
-                    <p><strong>Status:</strong> <span id="receiptOrderStatus"></span></p>
-                </div>
-            </div>
-            <!-- CSS for Print -->
-            <style>
-                @media print {
-
-                    #navbar,
-                    #sidebar,
-                    #printButton,
-                    #receipt,
-                    #form * {
-                        visibility: hidden;
-                    }
-
-                    #receipt,
-                    #receipt * {
-                        visibility: visible;
-                    }
-
-                    #receipt {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                    }
-                }
-            </style>
-
-            <!-- JavaScript -->
-            <script>
-                function generateReceipt() {
-                    // Get values from input fields
-                    const orderId = document.getElementById('orderId').value;
-                    const userName = document.getElementById('userName').value;
-                    const city = document.getElementById('city').value;
-                    const orderDate = document.getElementById('orderDate').value;
-                    const orderStatus = document.getElementById('orderStatus').value;
-
-                    // Populate receipt section
-                    document.getElementById('receiptOrderId').textContent = orderId;
-                    document.getElementById('receiptUserName').textContent = userName;
-                    document.getElementById('receiptCity').textContent = city;
-                    document.getElementById('receiptOrderDate').textContent = orderDate;
-                    document.getElementById('receiptOrderStatus').textContent = orderStatus;
-
-                    // Show the receipt section
-                    document.getElementById('receipt').style.display = 'block';
-                }
-
-                function printReceipt() {
-                    window.print();
-                }
-            </script>
-            <x-web.footer />
+<x-admin.footer />

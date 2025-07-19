@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\shoppingCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\productItems;
 use App\Traits\Apptraits;
 
 
@@ -15,69 +16,91 @@ class CartController extends Controller
     use Apptraits;
 
     public $model='App\Models\shoppingCart';
-
-    public function add(Request $request)
-    {
-        // Check if the user is authenticated
-        if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You need to be logged in to add products to the cart.',
-                'redirect' => route('login') // Redirect to the login page
-            ], 401); // 401 Unauthorized response
-        }
-
-        // Validate the request
-        $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
-            'size_id' => 'required|integer|exists:product_items,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
-
-        // Get the authenticated user ID
-        $userId = auth()->id();
-
-        try {
-            // Check if the product is already in the cart for this user (same size)
-            $existingCartItem = ShoppingCart::where('user_id', $userId)
-                ->where('products_id', $request->product_id)
-                ->where('size_id', $request->size_id)
-                ->first();
-
-            if ($existingCartItem) {
-                // If the product exists, update the quantity
-                $existingCartItem->quantity += $request->quantity;
-                $existingCartItem->save();
-                $message = 'Product quantity updated successfully';
-            } else {
-                // Add a new product to the cart
-                ShoppingCart::create([
-                    'user_id' => $userId,
-                    'products_id' => $request->product_id,
-                    'size_id' => $request->size_id,
-                    'quantity' => $request->quantity,
-                ]);
-                $message = 'Product added to cart successfully';
-            }
-
-            // Get the updated cart count for the user
-            $cartCount = ShoppingCart::where('user_id', $userId)->count();
-
-            // Return a success response with the updated cart count
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'cartCount' => $cartCount // Include cart count in response
-            ]);
-        } catch (\Exception $e) {
-            // Handle exceptions and return an error response
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while adding the product to the cart. Please try again.',
-                'error' => $e->getMessage()
-            ], 500); // Internal server error
-        }
+public function add(Request $request)
+{
+    if (!auth()->check()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You need to be logged in to add products to the cart.',
+            'redirect' => route('login')
+        ], 401);
     }
+
+    // Validate the request
+    $request->validate([
+        'product_id' => 'required|integer|exists:products,id',
+        'size_id'    => 'required|integer|exists:product_items,id',
+        'quantity'   => 'required|integer|min:1',
+    ]);
+
+    $userId = auth()->id();
+
+    try {
+        // Get product item stock
+        $productItem = productItems::where('id', $request->size_id)
+            ->where('products_id', $request->product_id)
+            ->first();
+
+        if (!$productItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product size not found.'
+            ], 404);
+        }
+
+        $availableStock = $productItem->quantity;
+
+        // Get existing quantity in cart
+        $existingCartItem = ShoppingCart::where('user_id', $userId)
+            ->where('products_id', $request->product_id)
+            ->where('size_id', $request->size_id)
+            ->first();
+
+        $existingQuantity = $existingCartItem ? $existingCartItem->quantity : 0;
+        $requestedQuantity = $request->quantity;
+
+        // Total quantity after adding
+        $newTotalQuantity = $existingQuantity + $requestedQuantity;
+
+        if ($newTotalQuantity > $availableStock) {
+            $productName = optional($productItem->product)->name ?? 'Product';
+
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot add more than available stock for: {$productName}. Only {$availableStock} left in stock.",
+            ], 400); // Bad Request
+        }
+
+        // Update or create cart item
+        if ($existingCartItem) {
+            $existingCartItem->quantity = $newTotalQuantity;
+            $existingCartItem->save();
+            $message = 'Product quantity updated successfully.';
+        } else {
+            ShoppingCart::create([
+                'user_id'     => $userId,
+                'products_id' => $request->product_id,
+                'size_id'     => $request->size_id,
+                'quantity'    => $requestedQuantity,
+            ]);
+            $message = 'Product added to cart successfully.';
+        }
+
+        $cartCount = ShoppingCart::where('user_id', $userId)->count();
+
+        return response()->json([
+            'success'   => true,
+            'message'   => $message,
+            'cartCount' => $cartCount
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while adding the product to the cart. Please try again.',
+            'error'   => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function index()
     {

@@ -55,60 +55,71 @@ class orders extends Model
         return $this->hasMany(payments::class , 'orders_id');
 
     }
-    public function addOrderItems($userId)
-    {
-        DB::beginTransaction(); // Start a database transaction for safe operations
+ public function addOrderItems($userId)
+{
+    DB::beginTransaction(); // Start a database transaction
 
-        try {
-            // 1. Retrieve cart items by user ID
-            $cartItems = ShoppingCart::getCartItemsByUserId($userId);
+    try {
+        // 1. Retrieve cart items by user ID
+        $cartItems = ShoppingCart::getCartItemsByUserId($userId);
 
-            if ($cartItems->isEmpty()) {
-                // Throw an exception if the cart is empty
-                throw new \Exception('Cart is empty.');
-            }
-
-            // 2. Loop through the cart items and create OrderItems
-            foreach ($cartItems as $cartItem) {
-                // Find the corresponding product item by products_id and size_id
-                $productItem = productItems::where('products_id', $cartItem->products_id)
-                    ->where('id', $cartItem->size_id)
-                    ->first();
-
-                // if (!$productItem || $productItem->quantity < 1) {
-                //     throw new \Exception(
-                //         'Insufficient stock for product ID: ' . $cartItem->products_id .
-                //         ', Size ID: ' . $cartItem->size_id
-                //     );
-                // }
-
-                // Decrement the quantity by 1
-                // $productItem->decrement('quantity', 1);
-
-                // Create the order item
-                orderItems::create([
-                    'orders_id'   => $this->id, // Use the current order's ID
-                    'products_id' => $cartItem->products_id,
-                    'quantity'    => $cartItem->quantity,
-                    'size'     => $productItem->size,
-                    'price' => ($cartItem->product->price - ($cartItem->product->price * ($cartItem->product->sale / 100))) * $cartItem->quantity,
-                ]);
-            }
-
-            // 3. Empty the shopping cart for the given user
-            ShoppingCart::where('user_id', $userId)->delete();
-
-            DB::commit(); // Commit the transaction if everything is fine
-
-            // Return true for success
-            return true;
-
-        } catch (\Exception $e) {
-            DB::rollBack(); // Rollback the transaction in case of any error
-
-            // Optionally rethrow the exception for handling in the controller
-            throw new \Exception('Failed to add order items: ' . $e->getMessage());
+        if ($cartItems->isEmpty()) {
+            // Return failure response
+            return [
+                'success' => false,
+                'message' => 'Cart is empty.'
+            ];
         }
+
+        // 2. Loop through the cart items and create OrderItems
+        foreach ($cartItems as $cartItem) {
+            $productItem = productItems::where('products_id', $cartItem->products_id)
+                ->where('id', $cartItem->size_id)
+                ->first();
+
+            // Optional stock check
+            // if (!$productItem || $productItem->quantity < 1) {
+            //     return [
+            //         'success' => false,
+            //         'message' => 'Insufficient stock for product ID: ' . $cartItem->products_id
+            //     ];
+            // }
+                        // Calculate updated quantity ensuring it doesn’t go below 0
+            $newQuantity = max(0, $productItem->quantity - $cartItem->quantity);
+
+            // Update stock
+            $productItem->quantity = $newQuantity;
+            $productItem->save();
+
+            // Create order item
+            orderItems::create([
+                'orders_id'   => $this->id,
+                'products_id' => $cartItem->products_id,
+                'quantity'    => $cartItem->quantity,
+                'size'        => $productItem->size,
+                'price'       => ($cartItem->product->price - ($cartItem->product->price * ($cartItem->product->sale / 100))) * $cartItem->quantity,
+            ]);
+        }
+
+        // 3. Clear the user's cart
+        ShoppingCart::where('user_id', $userId)->delete();
+
+        DB::commit(); // Commit transaction
+
+        return [
+            'success' => true,
+            'message' => 'Order items added successfully.'
+        ];
+
+    } catch (\Exception $e) {
+        DB::rollBack(); // Rollback on error
+
+        return [
+            'success' => false,
+            'message' => 'Failed to add order items: ' . $e->getMessage()
+        ];
     }
+}
+
 
 }

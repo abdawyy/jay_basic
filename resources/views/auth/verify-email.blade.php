@@ -1,42 +1,48 @@
+@php $locale = app()->getLocale(); @endphp
+
 <x-guest-layout>
+    @section('title', __('auth.verify_email_title'))
+    @section('meta_description', __('auth.verify_email_description'))
+
+    @push('meta')
+        <meta name="description" content="{{ __('auth.verify_email_description') }}">
+        <meta name="robots" content="noindex, nofollow">
+    @endpush
+
     <x-authentication-card>
         <x-slot name="logo">
             <x-authentication-card-logo />
         </x-slot>
 
         <div class="mb-4 text-sm text-gray-600">
-            {{ __('Before continuing, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+            {{ __('auth.verify_email_message') }}
         </div>
 
-        @if (session('status') == 'verification-link-sent')
+        @if (session('status') === 'verification-link-sent')
             <div class="mb-4 font-medium text-sm text-green-600">
-                {{ __('A new verification link has been sent to the email address you provided in your profile settings.') }}
+                {{ __('auth.verification_link_resent') }}
             </div>
         @endif
 
         <div class="mt-4 flex items-center justify-between">
             <form method="POST" action="{{ route('verification.send') }}">
                 @csrf
-
-                <div>
-                    <x-button type="submit">
-                        {{ __('Resend Verification Email') }}
-                    </x-button>
-                </div>
+                <x-button type="submit">
+                    {{ __('auth.resend_verification_email') }}
+                </x-button>
             </form>
 
             <div>
-                <a
-                    href="{{ route('profile.show') }}"
-                    class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    {{ __('Edit Profile') }}</a>
+                <a href="{{ route('profile.show') }}"
+                   class="underline text-sm text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    {{ __('auth.edit_profile') }}
+                </a>
 
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
-
-                    <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ms-2">
-                        {{ __('Log Out') }}
+                    <button type="submit"
+                            class="underline text-sm text-gray-600 hover:text-gray-900 ms-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        {{ __('auth.logout') }}
                     </button>
                 </form>
             </div>

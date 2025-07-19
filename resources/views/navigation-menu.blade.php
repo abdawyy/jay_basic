@@ -5,8 +5,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                        <a class="navbar-brand" href="/"><img src={{ asset('assets/img/logo.jpg') }} alt=""
-                            style="width: 120px;"></a>                    </a>
+                        <a class="navbar-brand" href="/"><img src={{ asset('assets/img/logo.png') }} alt=""
+                            style="width: 160px; height: 80px"></a>                    </a>
                 </div>
 
                 {{-- <!-- Navigation Links -->

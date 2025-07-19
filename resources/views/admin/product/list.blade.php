@@ -1,32 +1,43 @@
 <x-admin.header />
 <x-admin.aside />
 
-    <x-admin.navbar />
+<x-admin.navbar />
 
-    <main id="main">
-        <div class="container-fluid">
-            <div class="row pt-4">
-                <div class="pagetitle">
-                    <h1>Products</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="">Products</a></li>
-                            <li class="breadcrumb-item active">list</li>
-                        </ol>
-                    </nav>
-                </div><!-- End Breadcrumbs with a page title -->
+@php $isRtl = app()->getLocale() === 'ar'; @endphp
 
-<x-data-table :headers="$headers" :rows="$rows" :url="$url"/>
+<main id="main">
+    <div class="container">
+        <div class="row pt-4">
+            <div class="pagetitle">
+                <h1>{{ __('products.title') }}</h1>
+                <nav>
+                    <ol class="breadcrumb d-flex {{ $isRtl ? 'text-end' : 'text-start' }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+                        <li class="breadcrumb-item"><a href="#">{{ __('products.breadcrumb_main') }}</a></li>
+                        <li class="mx-2">-</li>
+                        <li class="breadcrumb-item active">{{ __('products.breadcrumb_list') }}</li>
+                    </ol>
+                </nav>
+            </div>
 
+            <x-data-table :headers="$headers" :rows="$rows" :url="$url"/>
 
-<style>
-.btn-danger{
+            <!-- Pagination links -->
+            <div class="mt-4">
+{{ $data->links('vendor.pagination.bootstrap-5') }}
+            </div>
 
-    display: none;
-}
-</style>
-   <!-- Pagination links -->
-   <div class="mt-4">
-    {{ $data->links() }}  <!-- This will display the pagination links -->
-</div>
-<x-web.footer />
+            <style>
+                .btn-danger {
+                    display: none;
+                }
+
+                svg {
+                    width: 5px !important;
+                    height: 5px !important;
+                }
+            </style>
+        </div>
+    </div>
+</main>
+
+<x-admin.footer />

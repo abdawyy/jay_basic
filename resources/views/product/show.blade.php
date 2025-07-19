@@ -5,134 +5,114 @@
 
 <section id="oneProduct" class="pb-5">
     <div class="container py-5">
-        <div class="row ">
+        <div class="row">
             <div class="col-12 col-lg-6">
                 <div class="row">
                     <!-- Main image -->
-                    <div class="col-12 px-2" style="margin-bottom: 12px;">
+                    <div class="col-12 mb-3">
                         <img id="mainImage" class="img-fluid img-oneProduct pointer"
-                            src="{{ $product->productImages->first() ? asset('storage/' . $product->productImages->first()->images) : asset('assets/img/default-image.jpg') }}"
-                            alt="{{ $product->name }}" onclick="openImage(this)">
+                             src="{{ $product->productImages->first() ? asset('storage/' . $product->productImages->first()->images) : asset('assets/img/default-image.jpg') }}"
+                             alt="{{ $product->name }}" onclick="openImage(this)">
                     </div>
 
                     <!-- Thumbnails -->
                     @foreach ($product->productImages as $productImage)
                         <div class="col-3 px-2">
                             <img class="img-fluid img-oneProduct-sub pointer {{ $loop->first ? 'img-selected' : '' }}"
-                                src="{{ asset('storage/' . $productImage->images) }}" alt="{{ $product->name }}"
-                                onclick="changeMainImage(this)">
+                                 src="{{ asset('storage/' . $productImage->images) }}" alt="{{ $product->name }}"
+                                 onclick="changeMainImage(this)">
                         </div>
                     @endforeach
                 </div>
             </div>
 
             <div class="col-12 col-lg-6 pt-4 pt-lg-0 pb-5">
-                <!-- Product stock status -->
                 <div class="d-flex pb-3 gap-2">
                     @php
-                    $totalQuantity = $product->productItems->sum('quantity');
-                @endphp
-
-                @if ($totalQuantity > 0)
-                    <span class="inStock px-3 fw-semibold">In Stock</span>
-                @else
-                    <span class="outStock px-3 fw-semibold">Out of Stock</span>
-                @endif
-
+                        $totalQuantity = $product->productItems->sum('quantity');
+                    @endphp
+                    <span class="{{ $totalQuantity > 0 ? 'inStock' : 'outStock' }} px-3 fw-semibold">
+                        {{ $totalQuantity > 0 ? __('web.in_stock') : __('web.out_of_stock') }}
+                    </span>
                 </div>
 
-                <!-- Product title and bestseller status -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <h1 class="fw-semibold fs-3">{{ $product->name }}</h1>
-                    {{-- @if ($product->is_best_seller)
-                        <span class="bestSelar px-3 fw-semibold">BEST SELLER</span>
-                    @endif --}}
-                </div>
+                <h1 class="fw-semibold fs-3">{{ $product->name }}</h1>
 
-                <!-- Product price -->
                 <h2 class="fw-bolder fs-2">
                     @if ($product->sale)
-                        <span class=" mx-3 text-decoration-line-through fw-normal fst-italic fc-gray">
-                            {{ $product->price }} LE
-                              </span>
-                        {{ $product->price - ($product->price * $product->sale / 100) }} LE
+                        <span class="mx-3 text-decoration-line-through fw-normal fst-italic fc-gray">
+                            {{ number_format($product->price, 2) }} LE
+                        </span>
+                        {{ number_format($product->price - ($product->price * $product->sale / 100), 2) }} LE
                     @else
-                        {{ $product->price }} LE
+                        {{ number_format($product->price, 2) }} LE
                     @endif
                 </h2>
 
-
-                <!-- Product description -->
-                <p class="fs-5 fw-bolder mb-0 pt-2">Description:</p>
+                <p class="fs-5 fw-bolder mb-0 pt-2">{{ __('web.description') }}:</p>
                 <p class="lh-sm">{{ $product->description }}</p>
 
-                <!-- Product color -->
+                <!-- Color -->
                 <div class="d-flex gap-2 flex-column">
-                    <span class="fs-5 fw-bolder">Color:</span>
+                    <span class="fs-5 fw-bolder">{{ __('web.color') }}:</span>
                     <div class="d-flex align-items-center gap-2 warp">
-                        <input type="radio" class="btn-check" name="color" id="{{ $product->color }}"
-                            autocomplete="off" checked>
+                        <input type="radio" class="btn-check" name="color" id="{{ $product->color }}" autocomplete="off" checked>
                         <label class="color-checked px-3 py-1 fw-semibold pointer" for="{{ $product->color }}">
                             {{ ucfirst($product->color) }}
                         </label>
                     </div>
                 </div>
 
-<!-- Quantity section -->
-<div class="d-flex gap-2 align-items-center mt-3">
-    <span class="fs-5 fw-bolder">Quantity:</span>
-    <div class="quantity-control d-flex align-items-center gap-2">
-        <button type="button" class="btn btn-outline-secondary" id="decrease-qty" onclick="changeQuantity(-1)">-</button>
-        <input type="number" class="form-control text-center" id="quantity" name="quantity" value="1" min="1" max="10">
-        <button type="button" class="btn btn-outline-secondary" id="increase-qty" onclick="changeQuantity(1)">+</button>
-    </div>
-</div>
-                <!-- Product sizes -->
+                <!-- Quantity -->
+                <div class="d-flex gap-2 align-items-center mt-3">
+                    <span class="fs-5 fw-bolder">{{ __('web.quantity') }}:</span>
+                    <div class="quantity-control d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="changeQuantity(-1)">-</button>
+                        <input type="number" class="form-control text-center" id="quantity" name="quantity" value="1" min="1" max="10" style="width: 60px;">
+                        <button type="button" class="btn btn-outline-secondary" onclick="changeQuantity(1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Size -->
                 <div class="d-flex gap-2 flex-column pt-3">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fs-5 fw-bolder">Size:</span>
-                        <span class="fs-6 fw-normal pointer" data-bs-toggle="modal" data-bs-target="#sizeModal"
-                            style="text-decoration: underline; text-underline-offset: 2px;">What's my size?</span>
+                        <span class="fs-5 fw-bolder">{{ __('web.size') }}:</span>
+                        <span class="fs-6 fw-normal pointer" data-bs-toggle="modal" data-bs-target="#sizeModal" style="text-decoration: underline;">
+                            {{ __('web.what_size') }}
+                        </span>
                     </div>
                     <div class="d-flex align-items-center gap-2 warp">
                         @foreach ($product->productItems as $productItem)
-                            @if ($productItem->quantity !== null) {{-- Skip if quantity is NULL --}}
+                            @if ($productItem->quantity !== null)
                                 <input type="radio" class="btn-check" name="productItem_id" id="{{ $productItem->size }}"
-                                    value="{{ $productItem->id }}" autocomplete="off"
-                                    @if ($productItem->quantity <= 0) disabled @endif>
-                                <label class="color-checked px-3 py-1 fw-semibold pointer"
-                                    for="{{ $productItem->size }}"
-                                    style="@if ($productItem->quantity <= 0) opacity: 0.5; @endif">
+                                       value="{{ $productItem->id }}" autocomplete="off" {{ $productItem->quantity <= 0 ? 'disabled' : '' }}>
+                                <label class="color-checked px-3 py-1 fw-semibold pointer" for="{{ $productItem->size }}"
+                                       style="{{ $productItem->quantity <= 0 ? 'opacity: 0.5;' : '' }}">
                                     {{ $productItem->size }}
                                 </label>
                             @endif
                         @endforeach
                     </div>
-
-
-
-
                 </div>
 
-                <!-- Buy and Add to cart buttons -->
+                <!-- Add to cart -->
                 <div class="row pt-4">
-
-                    <div class="col-5">
-                        <button class="outlineBtn w-100 fw-semibold" style="padding: 12px 0px;"
-                            onclick="addToCart({{ $product->id }})">Add to cart</button>
+                    <div class="col-12 col-md-6">
+                        <button class="outlineBtn w-100 fw-semibold" onclick="addToCart({{ $product->id }})">
+                            {{ __('web.add_to_cart') }}
+                        </button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Modal for size guide -->
+    <!-- Size Modal -->
     <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="sizeModalLabel">What's my size</h1>
+                    <h1 class="modal-title fs-5" id="sizeModalLabel">{{ __('web.what_size') }}</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -142,6 +122,7 @@
         </div>
     </div>
 </section>
+
 <script>
     // Get all the radio options
     const radioOptions = document.querySelectorAll('.radio-option input[type="radio"]');

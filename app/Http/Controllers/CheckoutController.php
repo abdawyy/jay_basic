@@ -74,7 +74,7 @@ class CheckoutController extends Controller
         unset($addressValues['_token']); // Remove CSRF token
 
         // Fetch the promo code details from the DiscountCodes model
-        $promoCodeValue = DiscountCodes::where('code', $promoCode)->first();
+        $promoCodeValue = discountCodes::where('code', $promoCode)->first();
 
         // Fetch the city based on the provided city ID
         $city = Cities::where('id', $validatedData['city'])->first();
@@ -108,8 +108,11 @@ class CheckoutController extends Controller
 
 
         // Add items from the shopping cart to the order
-        $order->addOrderItems(Auth::id());
+$addItemsResult = $order->addOrderItems(Auth::id());
 
+if (!$addItemsResult['success']) {
+    return redirect()->back()->with('error', $addItemsResult['message']);
+}
         // Create payment record
         payments::createCashPayment($order->id, $totalPrice);
 

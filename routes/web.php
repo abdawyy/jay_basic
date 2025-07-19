@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin;
 use App\Http\Controllers\AdminController;
@@ -23,9 +24,21 @@ use App\Http\Controllers\CitiesController;
 |
 */
 
+
+Route::get('/lang/{lang}', function ($lang) {
+    if (!in_array($lang, ['en', 'ar'])) {
+        $lang = 'en'; // default fallback
+    }
+    session()->put('locale', $lang);
+    app()->setLocale($lang);
+    return redirect()->back();
+})->name('lang.switch');
+
 Route::get('/', function () {
     return view('index');
 });
+Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
+Route::post('/send-contact', [ContactController::class, 'send'])->name('contact.send');
 Route::get('product/show/{id}', [ProductController::class, 'productWebShow'])->name('product.show');
 Route::match(['get', 'post'], 'product/list/category/{id?}', [ProductController::class, 'productWebList'])->name('product.List');
 
