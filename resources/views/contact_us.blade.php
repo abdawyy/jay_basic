@@ -15,7 +15,7 @@
     {{-- Open Graph (for social sharing) --}}
     <meta property="og:title" content="{{ __('web.title_contact') }} - JAY Basic">
     <meta property="og:description" content="{{ __('web.contact_meta_description') }}">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+    <meta property="og:image" content="{{ asset('images/logo.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
     
@@ -23,7 +23,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('web.title_contact') }} - JAY Basic">
     <meta name="twitter:description" content="{{ __('web.contact_meta_description') }}">
-    <meta name="twitter:image" content="{{ asset('images/logo.png') }}">
+    <meta name="twitter:image" content="{{ asset('images/logo.jpg') }}">
     <style>
 
 

@@ -146,7 +146,7 @@
     <img src="https://cdn-icons-png.flaticon.com/512/145/145802.png" alt="Facebook" width="30" height="30">
 </a>
 
-                    <a href="/contact" class="text-light">{{ __('web.cookies') }}</a>
+                    {{-- <a href="/contact" class="text-light">{{ __('web.cookies') }}</a> --}}
                 </div>
             </div>
         </div>

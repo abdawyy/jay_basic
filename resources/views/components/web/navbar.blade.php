@@ -17,7 +17,7 @@
     <!-- Open Graph Meta -->
     <meta property="og:title" content="{{ __('web.title') }}">
     <meta property="og:description" content="{{ __('web.description') }}">
-    <meta property="og:image" content="{{ asset('assets/img/logo.png') }}">
+    <meta property="og:image" content="{{ asset('assets/img/logo.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
 
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('web.title') }}">
     <meta name="twitter:description" content="{{ __('web.description') }}">
-    <meta name="twitter:image" content="{{ asset('assets/img/logo.png') }}">
+    <meta name="twitter:image" content="{{ asset('assets/img/logo.jpg') }}">
 
     <!-- hreflang for SEO -->
     <link rel="alternate" hreflang="en" href="{{ url('/lang/en') }}">
@@ -63,7 +63,7 @@
                     <img src="{{ asset('assets/img/humb-menu.svg') }}" style="width: 24px;" alt="">
                 </button>
                 <a class="navbar-brand" href="/">
-                    <img src="{{ asset('assets/img/logo.png') }}" alt="Jay Logo" style="width: 120px; height: 80px">
+                    <img src="{{ asset('assets/img/logo.jpg') }}" alt="Jay Logo" style="width: 120px; height: 35px">
                 </a>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">

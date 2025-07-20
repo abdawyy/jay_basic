@@ -1,7 +1,7 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
         <a class="navbar-brand" href="/">
-            <img src="{{ asset('assets/img/logo.png') }}" alt="Jay Logo" style="width: 160px; height: 80px">
+                    <img src="{{ asset('assets/img/logo.jpg') }}" alt="Jay Logo" style="width: 120px; height: 35px">
         </a>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
